@@ -1,21 +1,27 @@
+import { Link, useLocation } from "react-router-dom";
+
 export default function Topicbar() {
+  const location = useLocation();
   return (
-    <div className="flex items-center bg-gray-100 px-7 py-3 gap-x-10">
-      <div className="cursor-pointer">
-        <span className="uppercase tracking-wide text-rose-800 hover:text-rose-900 text-sm">
-          All Categories
+    <div className="flex items-center bg-gray-100 px-7 py-3 gap-x-5 md:gap-x-10">
+      <Link to={"/"} className="cursor-pointer">
+        <span
+          className={`uppercase tracking-wide ${
+            location.pathname === "/" ? "text-rose-800" : "text-gray-800"
+          } hover:text-rose-900 text-sm`}
+        >
+          Hot Posts
         </span>
-      </div>
-      <div className="cursor-pointer">
-        <span className="uppercase text-gray-800 hover:text-rose-900 tracking-wide text-sm">
-          Programming
+      </Link>
+      <Link to={"/r"} className="cursor-pointer">
+        <span
+          className={`uppercase tracking-wide ${
+            location.pathname === "/r" ? "text-rose-800" : "text-gray-800"
+          } hover:text-rose-900 text-sm`}
+        >
+          Subreddits
         </span>
-      </div>
-      <div className="cursor-pointer">
-        <span className="uppercase text-gray-800 hover:text-rose-900 tracking-wide text-sm">
-          Gamming
-        </span>
-      </div>
+      </Link>
     </div>
   );
 }

@@ -3,10 +3,16 @@ import {
   IconArrowBigUp,
   IconMessage,
 } from "@tabler/icons-react";
+import { Link } from "react-router-dom";
 
 export default function SinglePost(props) {
   return (
-    <div className="shadow-lg flex flex-col">
+    <Link
+      to={
+        "/u/raihanhori/posts/13-years-ago-today-a-true-patriot-lost-his-life-rest-in-peace-big-guy"
+      }
+      className="shadow-lg flex flex-col cursor-pointer hover:bg-gray-100"
+    >
       <div>
         <img
           src="https://source.unsplash.com/random"
@@ -41,6 +47,6 @@ export default function SinglePost(props) {
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

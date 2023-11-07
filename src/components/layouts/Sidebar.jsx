@@ -1,15 +1,19 @@
+import { IconFileStar, IconUserPlus } from "@tabler/icons-react";
 import {
   IconChevronDown,
   IconChevronUp,
   IconFile,
   IconHome,
   IconLayoutDashboard,
+  IconLogin2,
   IconNotification,
 } from "@tabler/icons-react";
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 export default function Sidebar() {
   const [dropdown, setDropdown] = useState(false);
+  const location = useLocation();
 
   const handleDropdownClicked = () => {
     setDropdown(!dropdown);
@@ -44,28 +48,86 @@ export default function Sidebar() {
         />
         <ul className="space-y-6 mt-5">
           <li>
-            <div className="flex items-center gap-x-5 cursor-pointer text-rose-700 font-semibold">
+            <Link
+              to={"/"}
+              className={`flex items-center gap-x-5 cursor-pointer hover:cursor-pointer hover:text-rose-700 hover:font-semibold ${
+                location.pathname === "/" ? "text-rose-700 font-semibold" : ""
+              }`}
+            >
               <IconHome />
               <div>Home</div>
-            </div>
+            </Link>
           </li>
           <li>
-            <div className="flex items-center gap-x-5">
+            <Link
+              to={"/login"}
+              className={`flex items-center gap-x-5 cursor-pointer hover:cursor-pointer hover:text-rose-700 hover:font-semibold ${
+                location.pathname === "/login"
+                  ? "text-rose-700 font-semibold"
+                  : ""
+              }`}
+            >
+              <IconLogin2 />
+              <div>Login</div>
+            </Link>
+          </li>
+          <li>
+            <Link
+              to={"/register"}
+              className={`flex items-center gap-x-5 cursor-pointer hover:cursor-pointer hover:text-rose-700 hover:font-semibold ${
+                location.pathname === "/register"
+                  ? "text-rose-700 font-semibold"
+                  : ""
+              }`}
+            >
+              <IconUserPlus />
+              <div>Register</div>
+            </Link>
+          </li>
+          <li>
+            <div className="flex items-center gap-x-5 hover:cursor-pointer hover:text-rose-700 hover:font-semibold">
               <IconNotification />
               <div>Notification</div>
             </div>
           </li>
           <li>
-            <div className="flex items-center gap-x-5">
+            <Link
+              to={"/u/posts"}
+              className={`flex items-center gap-x-5 cursor-pointer hover:cursor-pointer hover:text-rose-700 hover:font-semibold ${
+                location.pathname === "/u/posts"
+                  ? "text-rose-700 font-semibold"
+                  : ""
+              }`}
+            >
               <IconFile />
-              <div>My Posts</div>
-            </div>
+              <div>MyPost</div>
+            </Link>
           </li>
           <li>
-            <div className="flex items-center gap-x-5">
+            <Link
+              to={"/u/subreddits"}
+              className={`flex items-center gap-x-5 cursor-pointer hover:cursor-pointer hover:text-rose-700 hover:font-semibold ${
+                location.pathname === "/u/subreddits"
+                  ? "text-rose-700 font-semibold"
+                  : ""
+              }`}
+            >
               <IconLayoutDashboard />
               <div>My Subreddits</div>
-            </div>
+            </Link>
+          </li>
+          <li>
+            <Link
+              to={"/u/subscribed"}
+              className={`flex items-center gap-x-5 cursor-pointer hover:cursor-pointer hover:text-rose-700 hover:font-semibold ${
+                location.pathname === "/u/subscribed"
+                  ? "text-rose-700 font-semibold"
+                  : ""
+              }`}
+            >
+              <IconFileStar />
+              <div>Subscibed</div>
+            </Link>
           </li>
         </ul>
       </div>
