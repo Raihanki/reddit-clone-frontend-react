@@ -1,13 +1,34 @@
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import AllPost from "../../components/Post/AllPost";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import ApiRequest from "../../api/RequestConfig";
+import Loading from "../../components/Loading";
+import moment from "moment";
 
 export default function DetailSubreddit() {
   const [createPost, setCreatePost] = useState(false);
   const handleCreatePost = () => {
     setCreatePost(!createPost);
   };
+  const params = useParams();
+  const query = useQuery({
+    queryKey: ["subreddit", params.subreddit],
+    queryFn: () => ApiRequest.get(`/subreddits/${params.subreddit}`),
+  });
+
+  if (query.isLoading) {
+    return (
+      <div className="w-full flex items-center justify-center mt-20">
+        <Loading></Loading>
+      </div>
+    );
+  }
+
+  if (query.isError) return <div>Something Went Wrong</div>;
+
+  const subreddit = query.data?.data?.data;
   return (
     <div>
       <div className="flex flex-col md:flex-row items-center md:items-start justify-center md:justify-start gap-x-5 gap-y-5 border-b pb-10">
@@ -19,19 +40,15 @@ export default function DetailSubreddit() {
           />
         </div>
         <div>
-          <h1 className="text-3xl">Laravel</h1>
+          <h1 className="text-3xl">{subreddit.name}</h1>
           <div>
             <span className="text-gray-500 text-sm">
-              Created by Raihanhori at 09 October 2003
+              Created by {subreddit.createdBy} at{" "}
+              {moment(subreddit.createdAt).format("DD MMMM YYYY")}
             </span>
           </div>
           <div className="my-4">
-            <p className="leading-relaxed">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Vero sint
-              atque quibusdam, aperiam labore aut ab quidem, delectus voluptatum
-              magni rerum odio in nam? Incidunt minus fugiat quaerat provident
-              quo!
-            </p>
+            <p className="leading-relaxed">{subreddit.description}</p>
           </div>
           <div className="flex flex-row gap-x-5 items-center">
             <div>
@@ -88,7 +105,7 @@ export default function DetailSubreddit() {
             </button>
           </form>
         </div>
-        <AllPost></AllPost>
+        <AllPost subreddit={subreddit.slug}></AllPost>
       </div>
     </div>
   );

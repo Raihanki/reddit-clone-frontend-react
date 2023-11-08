@@ -12,6 +12,7 @@ import MyPost from "./pages/post/MyPost";
 import MySubreddit from "./pages/subreddit/MySubreddit";
 import MySubscribed from "./pages/subreddit/MySubscribed";
 import UpdateSubreddit from "./pages/subreddit/UpdateSubreddit";
+import Authenticate from "./middleware/Authenticate";
 
 const Layout = () => {
   return (
@@ -37,10 +38,10 @@ const router = createBrowserRouter([
         path: "/register",
         element: <Register />,
       },
-      {
-        path: "/u/:username/posts/:post",
-        element: <DetailPost />,
-      },
+      //   {
+      //     path: "/u/:username/posts/:post",
+      //     element: <DetailPost />,
+      //   },
       {
         path: "/r",
         element: <Index />,
@@ -50,24 +51,48 @@ const router = createBrowserRouter([
         element: <DetailSubreddit />,
       },
       {
+        path: "/r/:subreddit/:post",
+        element: <DetailPost />,
+      },
+      {
         path: "/r/create",
-        element: <CreateSubreddit />,
+        element: (
+          <Authenticate>
+            <CreateSubreddit />
+          </Authenticate>
+        ),
       },
       {
         path: "/r/update/:subreddit",
-        element: <UpdateSubreddit />,
+        element: (
+          <Authenticate>
+            <UpdateSubreddit />
+          </Authenticate>
+        ),
       },
       {
         path: "/u/posts",
-        element: <MyPost />,
+        element: (
+          <Authenticate>
+            <MyPost />
+          </Authenticate>
+        ),
       },
       {
         path: "/u/subreddits",
-        element: <MySubreddit />,
+        element: (
+          <Authenticate>
+            <MySubreddit />
+          </Authenticate>
+        ),
       },
       {
         path: "/u/subscribed",
-        element: <MySubscribed />,
+        element: (
+          <Authenticate>
+            <MySubscribed />
+          </Authenticate>
+        ),
       },
       {
         path: "/*",

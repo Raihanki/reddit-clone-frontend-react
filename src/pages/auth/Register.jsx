@@ -1,6 +1,38 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import ApiRequest from "../../api/RequestConfig";
+import { useState } from "react";
 
 export default function Register() {
+  const [data, setData] = useState({
+    username: "",
+    fullname: "",
+    email: "",
+    password: "",
+  });
+
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setData({ ...data, [e.target.name]: e.target.value });
+  };
+
+  const registerMutation = useMutation({
+    mutationFn: (newUser) => ApiRequest.post("/auth/register", newUser),
+    onSuccess: (data) => {
+      navigate("/");
+      console.log(data);
+    },
+    onError: (error) => {
+      console.log(error.response.data);
+    },
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    registerMutation.mutate(data);
+  };
+
   return (
     <>
       <div className="shadow p-5 max-w-full lg:max-w-2xl">
@@ -13,7 +45,7 @@ export default function Register() {
             </Link>
           </span>
         </div>
-        <form className="mt-5">
+        <form className="mt-5" onSubmit={handleSubmit}>
           <div className="mb-3">
             <label htmlFor="username" className="text-sm">
               Username
@@ -22,6 +54,7 @@ export default function Register() {
               type="text"
               id="username"
               name="username"
+              onChange={handleChange}
               className="w-full px-3 py-1.5 border rounded-lg mt-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
             />
           </div>
@@ -33,6 +66,7 @@ export default function Register() {
               type="text"
               id="fullname"
               name="fullname"
+              onChange={handleChange}
               className="w-full px-3 py-1.5 border rounded-lg mt-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
             />
           </div>
@@ -44,10 +78,11 @@ export default function Register() {
               type="email"
               id="email"
               name="email"
+              onChange={handleChange}
               className="w-full px-3 py-1.5 border rounded-lg mt-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
             />
           </div>
-          <div>
+          <div className="mb-3">
             <label htmlFor="password" className="text-sm">
               Password
             </label>
@@ -55,6 +90,19 @@ export default function Register() {
               type="password"
               id="password"
               name="password"
+              onChange={handleChange}
+              className="w-full px-3 py-1.5 border rounded-lg mt-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
+            />
+          </div>
+          <div>
+            <label htmlFor="password_confirmation" className="text-sm">
+              Password Confirmation
+            </label>
+            <input
+              type="password"
+              id="password_confirmation"
+              name="password_confirmation"
+              onChange={handleChange}
               className="w-full px-3 py-1.5 border rounded-lg mt-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
             />
           </div>

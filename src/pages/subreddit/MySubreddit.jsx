@@ -1,6 +1,24 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import ApiRequest from "../../api/RequestConfig";
+import { useQuery } from "@tanstack/react-query";
+import Loading from "../../components/Loading";
+import moment from "moment";
 
 export default function MySubreddit() {
+  const query = useQuery({
+    queryKey: ["users", "subreddit"],
+    queryFn: () => ApiRequest.get("/users/subreddits"),
+  });
+
+  if (query.isLoading) {
+    return (
+      <div className="w-full flex items-center justify-center mt-20">
+        <Loading></Loading>
+      </div>
+    );
+  }
+
+  if (query.isError) return <div>Something Went Wrong</div>;
   return (
     <>
       <Link
@@ -11,54 +29,36 @@ export default function MySubreddit() {
       </Link>
       <div className="border p-5 mt-5">
         <div className="flex flex-col">
-          <div className="flex items-center justify-between mb-5 border-b pb-5">
-            <div className="flex gap-x-5 items-center">
-              <div>
-                <img
-                  src="https://source.unsplash.com/random"
-                  alt="subreddit-image"
-                  className="w-16 h-16 object-cover rounded-full"
-                />
-              </div>
-              <div>
+          {query.data?.data?.data?.map((subreddit) => (
+            <div
+              key={subreddit.id}
+              className="flex items-center justify-between mb-5 border-b pb-5"
+            >
+              <div className="flex gap-x-5 items-center">
                 <div>
-                  <Link
-                    to={"/r/laravel"}
-                    className="text-2xl font-medium text-slate-800 hover:text-orange-700 cursor-pointer"
-                  >
-                    Laravel
-                  </Link>
+                  <img
+                    src="https://source.unsplash.com/random"
+                    alt="subreddit-image"
+                    className="w-16 h-16 object-cover rounded-full"
+                  />
                 </div>
-                <span className="text-slate-500 text-sm">
-                  Subreddit created by. raihanhori at 09 October 2003
-                </span>
+                <div>
+                  <div>
+                    <Link
+                      to={`/r/${subreddit.slug}`}
+                      className="text-2xl font-medium text-slate-800 hover:text-orange-700 cursor-pointer"
+                    >
+                      {subreddit.name}
+                    </Link>
+                  </div>
+                  <span className="text-slate-500 text-sm">
+                    Subreddit created by. {subreddit.createdBy} at{" "}
+                    {moment(subreddit.createdAt).format("DD MMMM YYYY")}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex items-center justify-between mb-5 border-b pb-5">
-            <div className="flex gap-x-5 items-center">
-              <div>
-                <img
-                  src="https://source.unsplash.com/random"
-                  alt="subreddit-image"
-                  className="w-16 h-16 object-cover rounded-full"
-                />
-              </div>
-              <div>
-                <div>
-                  <Link
-                    to={"/r/laravel"}
-                    className="text-2xl font-medium text-slate-800 hover:text-orange-700 cursor-pointer"
-                  >
-                    Node JS
-                  </Link>
-                </div>
-                <span className="text-slate-500 text-sm">
-                  Subreddit created by. bruhmoment at 20 March 2001
-                </span>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </>

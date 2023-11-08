@@ -1,12 +1,15 @@
 import { useState } from "react";
 import AllPost from "../../components/Post/AllPost";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
+import Loading from "../../components/Loading";
 
 export default function MyPost() {
   const [createPost, setCreatePost] = useState(false);
   const handleCreatePost = () => {
     setCreatePost(!createPost);
   };
+
   return (
     <div>
       <button
