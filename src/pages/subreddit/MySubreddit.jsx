@@ -6,7 +6,7 @@ import moment from "moment";
 
 export default function MySubreddit() {
   const query = useQuery({
-    queryKey: ["users", "subreddit"],
+    queryKey: ["users", "subreddits"],
     queryFn: () => ApiRequest.get("/users/subreddits"),
   });
 

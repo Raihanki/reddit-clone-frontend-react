@@ -1,9 +1,64 @@
 import { IconCameraPlus } from "@tabler/icons-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import ApiRequest from "../../api/RequestConfig";
+import Loading from "../../components/Loading";
+import { useNavigate } from "react-router-dom";
 
 export default function CreateSubreddit() {
+  const navigate = useNavigate();
+  const [data, setData] = useState({
+    name: "",
+    description: "",
+    country: "",
+    topicId: "",
+    allowPost: true,
+  });
+
+  const handleChange = (e) => {
+    if (e.target.type === "checkbox") {
+      setData({ ...data, [e.target.name]: e.target.checked });
+    } else {
+      setData({ ...data, [e.target.name]: e.target.value });
+    }
+  };
+
+  const queryGetTopic = useQuery({
+    queryKey: ["getTopic"],
+    queryFn: () => ApiRequest.get("/topics"),
+  });
+
+  const createSubredditMutation = useMutation({
+    mutationFn: (subreddit) => ApiRequest.post("/subreddits", subreddit),
+    onSuccess: (data) => {
+      navigate("/u/subreddits");
+    },
+    onError: (error) => {
+      console.log(error.response.data);
+    },
+  });
+
+  if (queryGetTopic.isLoading) {
+    return (
+      <div className="w-full flex items-center justify-center mt-20">
+        <Loading></Loading>
+      </div>
+    );
+  }
+
+  if (queryGetTopic.isError) return <div>Something Went Wrong</div>;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    createSubredditMutation.mutate(data);
+  };
+
   return (
     <div>
-      <form className="flex flex-col md:flex-row items-center md:items-start justify-center md:justify-start gap-x-5 gap-y-5 border-b pb-10">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col md:flex-row items-center md:items-start justify-center md:justify-start gap-x-5 gap-y-5 border-b pb-10"
+      >
         <div className="w-full md:w-1/3 flex md:block justify-center">
           <div className="w-64 h-64 object-cover rounded-full border border-gray-500 flex items-center justify-center">
             <IconCameraPlus className="w-20 h-20 opacity-50" />
@@ -15,6 +70,8 @@ export default function CreateSubreddit() {
               type="text"
               name="name"
               id="name"
+              value={data.name}
+              onChange={handleChange}
               className="w-full px-2 py-4 focus:outline-none md:w-1/2 text-gray-800 placeholder:text-gray-400 placeholder:text-xl placeholder:font-semibold bg-transparent border-t-0 border-l-0 border-r-0 border-grey-200 text-lg focus:ring-0 border-b"
               placeholder="Subreddit Name"
             />
@@ -24,6 +81,8 @@ export default function CreateSubreddit() {
               placeholder="Subreddit Description"
               name="description"
               id="description"
+              value={data.description}
+              onChange={handleChange}
               className="w-full px-3 py-1.5 border border-gray-400 rounded-lg mt-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
             ></textarea>
           </div>
@@ -32,6 +91,8 @@ export default function CreateSubreddit() {
               type="text"
               name="country"
               id="country"
+              value={data.country}
+              onChange={handleChange}
               className="w-full px-2 py-4 focus:outline-none md:w-1/2 text-gray-800 placeholder:text-gray-400 placeholder:text-xl placeholder:font-semibold bg-transparent border-t-0 border-l-0 border-r-0 border-grey-200 text-lg focus:ring-0 border-b"
               placeholder="Country"
             />
@@ -41,15 +102,19 @@ export default function CreateSubreddit() {
               Topic
             </label>
             <select
-              name="topic"
+              name="topicId"
               id="topic"
+              onChange={handleChange}
               className="w-full px-3 py-2 bg-transparent border border-gray-400 rounded-lg mt-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
             >
-              <option disabled selected>
+              <option selected defaultValue={true} disabled>
                 Select Subreddit Topic
               </option>
-              <option value="technologies">Technologies</option>
-              <option value="lifestyle">Lifestyle</option>
+              {queryGetTopic.data?.data?.data?.map((topic) => (
+                <option key={topic.id} value={topic.id}>
+                  {topic.title}
+                </option>
+              ))}
             </select>
           </div>
           <div className="mb-4">
@@ -57,6 +122,8 @@ export default function CreateSubreddit() {
               type="checkbox"
               name="allowPost"
               id="allowPost"
+              checked={data.allowPost}
+              onChange={handleChange}
               className="mr-2 cursor-pointer w-4 h-4"
             />
             <label htmlFor="allowPost" className="text-sm">
@@ -64,7 +131,15 @@ export default function CreateSubreddit() {
             </label>
           </div>
           <div className="flex flex-row gap-x-5 items-center">
-            <button className="px-3 py-2 bg-orange-600 hover:bg-orange-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-75">
+            <button
+              type="submit"
+              disabled={createSubredditMutation.isPending}
+              className={`${
+                createSubredditMutation.isPending
+                  ? "cursor-not-allowed opacity-50"
+                  : ""
+              } px-3 py-2 bg-orange-600 hover:bg-orange-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-75`}
+            >
               Save
             </button>
           </div>

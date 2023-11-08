@@ -22,6 +22,17 @@ export default function MyPost() {
       <div className={`border mb-5 p-3 ${createPost ? "block" : "hidden"}`}>
         <form>
           <div className="mb-3">
+            <label htmlFor="title" className="text-sm">
+              Title*
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              className="w-full px-3 py-1.5 border border-gray-400 rounded-lg mt-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
+            />
+          </div>
+          <div className="mb-3">
             <label htmlFor="content" className="text-sm">
               Content*
             </label>

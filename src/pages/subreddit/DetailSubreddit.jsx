@@ -1,14 +1,17 @@
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import AllPost from "../../components/Post/AllPost";
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import ApiRequest from "../../api/RequestConfig";
 import Loading from "../../components/Loading";
 import moment from "moment";
+import { useAuth } from "../../context/AuthContext";
 
 export default function DetailSubreddit() {
+  const navigate = useNavigate();
   const [createPost, setCreatePost] = useState(false);
+  const { authenticatedUser } = useAuth();
   const handleCreatePost = () => {
     setCreatePost(!createPost);
   };
@@ -17,6 +20,16 @@ export default function DetailSubreddit() {
     queryKey: ["subreddit", params.subreddit],
     queryFn: () => ApiRequest.get(`/subreddits/${params.subreddit}`),
   });
+
+  const handleDelete = async () => {
+    try {
+      await ApiRequest.delete(`/subreddits/${params.subreddit}`);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      navigate("/u/subreddits");
+    }
+  };
 
   if (query.isLoading) {
     return (
@@ -51,17 +64,27 @@ export default function DetailSubreddit() {
             <p className="leading-relaxed">{subreddit.description}</p>
           </div>
           <div className="flex flex-row gap-x-5 items-center">
-            <div>
-              <Link
-                to={"/r/update/laravel"}
-                className="px-3 py-2 bg-rose-600 hover:bg-rose-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-opacity-50 transition duration-75"
-              >
-                Update
-              </Link>
-            </div>
+            {subreddit.createdBy === authenticatedUser.username && (
+              <div>
+                <Link
+                  to={`/r/update/${subreddit.slug}`}
+                  className="px-3 py-2 bg-pink-600 hover:bg-pink-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 transition duration-75"
+                >
+                  Update
+                </Link>
+              </div>
+            )}
             <button className="px-3 py-2 bg-orange-600 hover:bg-orange-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-75">
               Subscribe
             </button>
+            {subreddit.createdBy === authenticatedUser.username && (
+              <button
+                onClick={handleDelete}
+                className="px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-75"
+              >
+                Delete
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -77,6 +100,17 @@ export default function DetailSubreddit() {
         <div className={`border mb-5 p-3 ${createPost ? "block" : "hidden"}`}>
           <form>
             <div className="mb-3">
+              <div className="mb-3">
+                <label htmlFor="title" className="text-sm">
+                  Title*
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  className="w-full px-3 py-1.5 border border-gray-400 rounded-lg mt-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
+                />
+              </div>
               <label htmlFor="content" className="text-sm">
                 Content*
               </label>
