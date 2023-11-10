@@ -1,14 +1,15 @@
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import Comment from "./Comment";
 import ApiRequest from "../../api/RequestConfig";
-import { useQuery, QueryClient, useMutation } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useParams } from "react-router-dom";
 import Loading from "../Loading";
 import moment from "moment";
 import { useState } from "react";
 
 export default function DetailPost() {
-  const queryClient = new QueryClient();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { subreddit, post } = useParams();
   const { data, isLoading, isError } = useQuery({
     queryKey: ["post", post],
@@ -28,18 +29,39 @@ export default function DetailPost() {
         `/posts/${dataPost.subreddit.slug}/${dataPost.slug}/comments`,
         newComment
       ),
-    onSuccess: () => {
+    onSuccess: (data) => {
       setContent("");
       queryClient.invalidateQueries({
-        queryKey: ["post", dataPost.slug],
-        exact: true,
+        queryKey: ["post", post],
       });
+    },
+    onError: (error) => {
+      console.log(error.response.data);
     },
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     createCommentMutation.mutate({ content });
+  };
+
+  const deletePostMutation = useMutation({
+    mutationFn: () => ApiRequest.delete(`/posts/${subreddit}/${dataPost.slug}`),
+    onSuccess: () => {
+      navigate(`/r/${subreddit}`);
+      queryClient.invalidateQueries({
+        queryKey: ["posts"],
+        exact: true,
+      });
+    },
+    onError: (error) => {
+      console.log(error.response.data);
+    },
+  });
+
+  const handleDelete = (e) => {
+    e.preventDefault();
+    deletePostMutation.mutate();
   };
 
   if (isLoading) {
@@ -83,6 +105,20 @@ export default function DetailPost() {
                 />
               </div> */}
             </div>
+            <div className="mb-4">
+              <button
+                type="submit"
+                disabled={deletePostMutation.isPending}
+                onClick={handleDelete}
+                className={`${
+                  deletePostMutation.isPending
+                    ? "cursor-not-allowed opacity-50"
+                    : ""
+                } px-3 py-2 bg-rose-600 hover:bg-rose-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-opacity-50 transition duration-75`}
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -103,6 +139,8 @@ export default function DetailPost() {
                 name="content"
                 id="content"
                 onChange={handleChange}
+                required
+                value={content}
                 className="w-full px-3 py-1.5 border border-gray-400 rounded-lg mt-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
               ></textarea>
             </div>

@@ -2,7 +2,7 @@ import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import AllPost from "../../components/Post/AllPost";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import ApiRequest from "../../api/RequestConfig";
 import Loading from "../../components/Loading";
 import moment from "moment";
@@ -29,6 +29,34 @@ export default function DetailSubreddit() {
     } finally {
       navigate("/u/subreddits");
     }
+  };
+
+  const [data, setData] = useState({
+    title: "",
+    content: "",
+  });
+
+  const handleChange = (e) => {
+    setData({ ...data, [e.target.name]: e.target.value });
+  };
+
+  const createPostMutation = useMutation({
+    mutationFn: (post) => ApiRequest.post(`/posts/${params.subreddit}`, post),
+    onSuccess: (data) => {
+      navigate(`/r/${params.subreddit}/${data.data.data.slug}`);
+      setData({
+        title: "",
+        content: "",
+      });
+    },
+    onError: (error) => {
+      console.log(error.response.data);
+    },
+  });
+
+  const handleSubmitPost = (e) => {
+    e.preventDefault();
+    createPostMutation.mutate(data);
   };
 
   if (query.isLoading) {
@@ -64,7 +92,7 @@ export default function DetailSubreddit() {
             <p className="leading-relaxed">{subreddit.description}</p>
           </div>
           <div className="flex flex-row gap-x-5 items-center">
-            {subreddit.createdBy === authenticatedUser.username && (
+            {subreddit.createdBy === authenticatedUser?.username && (
               <div>
                 <Link
                   to={`/r/update/${subreddit.slug}`}
@@ -77,7 +105,7 @@ export default function DetailSubreddit() {
             <button className="px-3 py-2 bg-orange-600 hover:bg-orange-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-75">
               Subscribe
             </button>
-            {subreddit.createdBy === authenticatedUser.username && (
+            {subreddit.createdBy === authenticatedUser?.username && (
               <button
                 onClick={handleDelete}
                 className="px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-75"
@@ -98,7 +126,7 @@ export default function DetailSubreddit() {
           {createPost ? <IconChevronUp /> : <IconChevronDown />}
         </button>
         <div className={`border mb-5 p-3 ${createPost ? "block" : "hidden"}`}>
-          <form>
+          <form onSubmit={handleSubmitPost}>
             <div className="mb-3">
               <div className="mb-3">
                 <label htmlFor="title" className="text-sm">
@@ -108,6 +136,8 @@ export default function DetailSubreddit() {
                   type="text"
                   id="title"
                   name="title"
+                  onChange={handleChange}
+                  value={data.title}
                   className="w-full px-3 py-1.5 border border-gray-400 rounded-lg mt-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
                 />
               </div>
@@ -117,6 +147,8 @@ export default function DetailSubreddit() {
               <textarea
                 name="content"
                 id="content"
+                onChange={handleChange}
+                value={data.content}
                 className="w-full px-3 py-1.5 border border-gray-400 rounded-lg mt-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
               ></textarea>
             </div>
@@ -133,7 +165,12 @@ export default function DetailSubreddit() {
             </div>
             <button
               type="submit"
-              className="px-3 py-2 bg-violet-600 hover:bg-violet-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-opacity-50 transition duration-75"
+              disabled={createPost.isPending}
+              className={`${
+                createPostMutation.isPending
+                  ? "cursor-not-allowed opacity-50"
+                  : ""
+              } px-3 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-75`}
             >
               Post
             </button>
