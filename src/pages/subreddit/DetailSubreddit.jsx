@@ -2,7 +2,7 @@ import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import AllPost from "../../components/Post/AllPost";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import ApiRequest from "../../api/RequestConfig";
 import Loading from "../../components/Loading";
 import moment from "moment";

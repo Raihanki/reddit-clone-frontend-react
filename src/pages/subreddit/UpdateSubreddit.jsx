@@ -1,13 +1,12 @@
 import { IconCameraPlus } from "@tabler/icons-react";
-import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import ApiRequest from "../../api/RequestConfig";
 import Loading from "../../components/Loading";
 import { useState } from "react";
 
-const queryClient = new QueryClient();
-
 export default function UpdateSubreddit() {
+  const queryClient = useQueryClient();
   const params = useParams();
   const navigate = useNavigate();
   const query = useQuery({
@@ -42,7 +41,7 @@ export default function UpdateSubreddit() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["users", "subreddits"],
+        queryKey: ["subreddit", params.subreddit],
         exact: true,
       });
       navigate(`/u/subreddits`);

@@ -1,11 +1,16 @@
-import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
+import {
+  IconArrowBigDown,
+  IconChevronDown,
+  IconChevronUp,
+} from "@tabler/icons-react";
 import Comment from "./Comment";
 import ApiRequest from "../../api/RequestConfig";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import Loading from "../Loading";
 import moment from "moment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { IconArrowBigUp } from "@tabler/icons-react";
 
 export default function DetailPost() {
   const queryClient = useQueryClient();
@@ -64,6 +69,36 @@ export default function DetailPost() {
     deletePostMutation.mutate();
   };
 
+  const [voteType, setVoteType] = useState(data?.data?.data.myVote);
+  console.log(voteType);
+  const createVoteMutation = useMutation({
+    mutationFn: (data) => {
+      return ApiRequest.post(`/votes/${dataPost.id}`, data);
+    },
+    onSuccess: (data) => {
+      console.log(data);
+      queryClient.invalidateQueries({
+        queryKey: ["post", post],
+      });
+    },
+  });
+
+  useEffect(() => {
+    setVoteType(data?.data?.data?.myVote);
+  }, [data]);
+
+  const handleUpVoteClick = (e) => {
+    e.preventDefault();
+    setVoteType("up");
+    createVoteMutation.mutate({ voteType: "up" });
+  };
+
+  const handleDownVoteClick = (e) => {
+    e.preventDefault();
+    setVoteType("down");
+    createVoteMutation.mutate({ voteType: "down" });
+  };
+
   if (isLoading) {
     return (
       <div className="w-full flex items-center justify-center mt-20">
@@ -80,7 +115,7 @@ export default function DetailPost() {
           <div className="flex flex-col items-center gap-y-2">
             <IconChevronUp />
             <div>
-              <span>20.1k</span>
+              <span>{dataPost.upVotes - dataPost.downVotes}</span>
             </div>
             <IconChevronDown />
           </div>
@@ -105,7 +140,7 @@ export default function DetailPost() {
                 />
               </div> */}
             </div>
-            <div className="mb-4">
+            <div className="mb-4 flex items-center gap-x-5">
               <button
                 type="submit"
                 disabled={deletePostMutation.isPending}
@@ -118,6 +153,20 @@ export default function DetailPost() {
               >
                 Delete
               </button>
+              <div className="flex items-center gap-x-2">
+                <IconArrowBigUp
+                  onClick={handleUpVoteClick}
+                  className={`text-orange-800 w-8 h-8 cursor-pointer hover:fill-orange-800 ${
+                    voteType === "up" && "fill-orange-800"
+                  }`}
+                />
+              </div>
+              <IconArrowBigDown
+                onClick={handleDownVoteClick}
+                className={`text-orange-800 w-8 h-8 cursor-pointer hover:fill-orange-800 ${
+                  voteType === "down" && "fill-orange-800"
+                }`}
+              />
             </div>
           </div>
         </div>
