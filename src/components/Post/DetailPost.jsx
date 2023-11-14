@@ -149,31 +149,34 @@ export default function DetailPost() {
             </div>
             <div className="py-10">
               <p className="leading-relaxed">{dataPost.content}</p>
-              {/* <div className="mt-5">
-                <img
-                  src="https://source.unsplash.com/random"
-                  alt="card-image"
-                  className="w-auto h-[400px] object-cover"
-                />
-              </div> */}
+              {dataPost.image && (
+                <div className="mt-5">
+                  <img
+                    src={dataPost.image}
+                    alt="card-image"
+                    className="w-auto h-[400px] object-cover"
+                  />
+                </div>
+              )}
             </div>
             <div className="mb-4 flex items-center gap-x-5">
               {authenticatedUser.id === dataPost.user.id ||
-                (authenticatedUser.username ===
-                  dataPost.subreddit.createdBy && (
-                  <button
-                    type="submit"
-                    disabled={deletePostMutation.isPending}
-                    onClick={handleDelete}
-                    className={`${
-                      deletePostMutation.isPending
-                        ? "cursor-not-allowed opacity-50"
-                        : ""
-                    } px-3 py-2 bg-rose-600 hover:bg-rose-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-opacity-50 transition duration-75`}
-                  >
-                    Delete
-                  </button>
-                ))}
+              authenticatedUser.username === dataPost.subreddit.createdBy ? (
+                <button
+                  type="submit"
+                  disabled={deletePostMutation.isPending}
+                  onClick={handleDelete}
+                  className={`${
+                    deletePostMutation.isPending
+                      ? "cursor-not-allowed opacity-50"
+                      : ""
+                  } px-3 py-2 bg-rose-600 hover:bg-rose-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-opacity-50 transition duration-75`}
+                >
+                  Delete
+                </button>
+              ) : (
+                ""
+              )}
               <div className="flex items-center gap-x-2">
                 <IconArrowBigUp
                   onClick={handleUpVoteClick}

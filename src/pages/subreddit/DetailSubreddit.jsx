@@ -34,6 +34,7 @@ export default function DetailSubreddit() {
   const [data, setData] = useState({
     title: "",
     content: "",
+    image: null,
   });
 
   const handleChange = (e) => {
@@ -47,6 +48,7 @@ export default function DetailSubreddit() {
       setData({
         title: "",
         content: "",
+        image: null,
       });
     },
     onError: (error) => {
@@ -54,9 +56,17 @@ export default function DetailSubreddit() {
     },
   });
 
+  const handleImagePost = (e) => {
+    setData({ ...data, image: e.target.files[0] });
+  };
+
   const handleSubmitPost = (e) => {
     e.preventDefault();
-    createPostMutation.mutate(data);
+    const formdata = new FormData();
+    formdata.append("title", data.title);
+    formdata.append("content", data.content);
+    formdata.append("image", data.image);
+    createPostMutation.mutate(formdata);
   };
 
   if (query.isLoading) {
@@ -168,6 +178,7 @@ export default function DetailSubreddit() {
                 type="file"
                 name="image"
                 id="image"
+                onChange={handleImagePost}
                 className="w-full mt-1"
               />
             </div>

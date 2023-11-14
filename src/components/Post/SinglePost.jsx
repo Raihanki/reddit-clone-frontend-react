@@ -1,6 +1,7 @@
 import {
   IconArrowBigDown,
   IconArrowBigUp,
+  IconCameraCancel,
   IconMessage,
 } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
@@ -15,11 +16,15 @@ export default function SinglePost(props) {
       className="shadow-lg flex flex-col cursor-pointer hover:bg-gray-100"
     >
       <div>
-        <img
-          src="https://source.unsplash.com/random"
-          alt="card-image"
-          className="w-full h-[350px] object-cover"
-        />
+        {post.image !== null ? (
+          <img
+            src={post.image}
+            alt="card-image"
+            className="w-full h-[350px] object-cover"
+          />
+        ) : (
+          <IconCameraCancel className="w-full h-[350px]" />
+        )}
       </div>
       <div className="py-5 px-5">
         <h3 className="text-gray-800 text-xl">{post.title}</h3>

@@ -69,6 +69,23 @@ export default function Comment({ comment, subreddit, post }) {
     deleteCommentMutation.mutate();
   };
 
+  const deleteReplyCommentMutation = useMutation({
+    mutationFn: (commentId) =>
+      ApiRequest.delete(`/posts/${subreddit}/${post}/comments/${commentId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["replyComment", comment.id],
+      });
+    },
+    onError: (error) => {
+      console.log(error.response.data);
+    },
+  });
+
+  const handleDeleteReply = (commentId) => {
+    deleteReplyCommentMutation.mutate(commentId);
+  };
+
   if (queryGetReply.isLoading) {
     return (
       <div className="w-full flex items-center justify-center mt-20">
@@ -166,7 +183,12 @@ export default function Comment({ comment, subreddit, post }) {
                 {moment.utc(reply.createdAt).fromNow()}
               </span>
             </div>
-            <div>Delete</div>
+            <div
+              className="text-sm text-rose-700 cursor-pointer hover:text-rose-900"
+              onClick={() => handleDeleteReply(reply.id)}
+            >
+              Delete
+            </div>
           </div>
         </div>
       ))}

@@ -1,9 +1,10 @@
-import { IconCameraPlus } from "@tabler/icons-react";
+import { IconCamera, IconCameraPlus } from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import ApiRequest from "../../api/RequestConfig";
 import Loading from "../../components/Loading";
 import { useNavigate } from "react-router-dom";
+import { useDropzone } from "react-dropzone";
 
 export default function CreateSubreddit() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ export default function CreateSubreddit() {
     country: "",
     topicId: "",
     allowPost: true,
+    avatar: null,
   });
 
   const handleChange = (e) => {
@@ -38,6 +40,24 @@ export default function CreateSubreddit() {
     },
   });
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formdata = new FormData();
+    formdata.append("avatar", data.avatar);
+    formdata.append("name", data.name);
+    formdata.append("description", data.description);
+    formdata.append("country", data.country);
+    formdata.append("topicId", data.topicId);
+    formdata.append("allowPost", data.allowPost);
+    createSubredditMutation.mutate(formdata);
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: (acceptedFiles) => {
+      setData({ ...data, avatar: acceptedFiles[0] });
+    },
+  });
+
   if (queryGetTopic.isLoading) {
     return (
       <div className="w-full flex items-center justify-center mt-20">
@@ -48,11 +68,6 @@ export default function CreateSubreddit() {
 
   if (queryGetTopic.isError) return <div>Something Went Wrong</div>;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    createSubredditMutation.mutate(data);
-  };
-
   return (
     <div>
       <form
@@ -60,8 +75,32 @@ export default function CreateSubreddit() {
         className="flex flex-col md:flex-row items-center md:items-start justify-center md:justify-start gap-x-5 gap-y-5 border-b pb-10"
       >
         <div className="w-full md:w-1/3 flex md:block justify-center">
-          <div className="w-64 h-64 object-cover rounded-full border border-gray-500 flex items-center justify-center">
-            <IconCameraPlus className="w-20 h-20 opacity-50" />
+          <div
+            className="w-64 h-64 object-cover rounded-full border border-gray-500 flex items-center justify-center cursor-pointer"
+            {...getRootProps()}
+          >
+            <input {...getInputProps()} />
+            {isDragActive ? (
+              <p className="uppercase font-bold text-lg">Drop Image Here...</p>
+            ) : data.avatar === null ? (
+              <>
+                <IconCamera className="w-20 h-20"></IconCamera>
+              </>
+            ) : (
+              <>
+                <img
+                  src={URL.createObjectURL(data.avatar)}
+                  alt="banner.png"
+                  className="w-64 h-64 object-cover rounded-full opacity-50 absolute"
+                />
+                <div className="relative flex flex-col items-center justify-center">
+                  <IconCamera className="w-20 h-20"></IconCamera>
+                  <div className="uppercase font-bold text-lg">
+                    Change Image
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
         <div className="w-full">

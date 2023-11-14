@@ -1,9 +1,10 @@
-import { IconCameraPlus } from "@tabler/icons-react";
+import { IconCamera, IconCameraPlus } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import ApiRequest from "../../api/RequestConfig";
 import Loading from "../../components/Loading";
 import { useState } from "react";
+import { useDropzone } from "react-dropzone";
 
 export default function UpdateSubreddit() {
   const queryClient = useQueryClient();
@@ -25,7 +26,12 @@ export default function UpdateSubreddit() {
     country: query.data?.data?.data?.country,
     topicId: query.data?.data?.data?.topicId,
     allowPost: query.data?.data?.data?.allowPost,
+    avatar: null,
   });
+
+  const [imageAvatar, setImageAvatar] = useState(
+    query.data?.data?.data?.avatar
+  );
 
   const handleChange = (e) => {
     if (e.target.type === "checkbox") {
@@ -37,14 +43,14 @@ export default function UpdateSubreddit() {
 
   const updateSubredditMutation = useMutation({
     mutationFn: (subreddit) => {
-      ApiRequest.put(`/subreddits/${params.subreddit}`, subreddit);
+      return ApiRequest.put(`/subreddits/${params.subreddit}`, subreddit);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["subreddit", params.subreddit],
         exact: true,
       });
-      navigate(`/u/subreddits`);
+      navigate(`/r/${data.data.slug}`);
     },
     onError: (error) => {
       console.log(error.response.data);
@@ -53,8 +59,23 @@ export default function UpdateSubreddit() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    updateSubredditMutation.mutate(subreddit);
+    const formdata = new FormData();
+    if (subreddit.avatar !== null) {
+      formdata.append("avatar", subreddit.avatar);
+    }
+    formdata.append("name", subreddit.name);
+    formdata.append("description", subreddit.description);
+    formdata.append("country", subreddit.country);
+    formdata.append("topicId", subreddit.topicId);
+    formdata.append("allowPost", subreddit.allowPost);
+    updateSubredditMutation.mutate(formdata);
   };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: (acceptedFiles) => {
+      setSubreddit({ ...subreddit, avatar: acceptedFiles[0] });
+    },
+  });
 
   if (query.isLoading || queryTopic.isLoading) {
     return (
@@ -74,8 +95,32 @@ export default function UpdateSubreddit() {
         className="flex flex-col md:flex-row items-center md:items-start justify-center md:justify-start gap-x-5 gap-y-5 border-b pb-10"
       >
         <div className="w-full md:w-1/3 flex md:block justify-center">
-          <div className="w-64 h-64 object-cover rounded-full border border-gray-500 flex items-center justify-center">
-            <IconCameraPlus className="w-20 h-20 opacity-50" />
+          <div
+            className="w-64 h-64 object-cover rounded-full border border-gray-500 flex items-center justify-center cursor-pointer"
+            {...getRootProps()}
+          >
+            <input {...getInputProps()} />
+            {isDragActive ? (
+              <p className="uppercase font-bold text-lg">Drop Image Here...</p>
+            ) : (
+              <>
+                <img
+                  src={
+                    subreddit.avatar === null
+                      ? imageAvatar
+                      : URL.createObjectURL(subreddit.avatar)
+                  }
+                  alt="banner.png"
+                  className="w-64 h-64 object-cover rounded-full opacity-50 absolute"
+                />
+                <div className="relative flex flex-col items-center justify-center">
+                  <IconCamera className="w-20 h-20"></IconCamera>
+                  <div className="uppercase font-bold text-lg">
+                    Change Image
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
         <div className="w-full">
@@ -148,7 +193,15 @@ export default function UpdateSubreddit() {
             </label>
           </div>
           <div className="flex flex-row gap-x-5 items-center">
-            <button className="px-3 py-2 bg-orange-600 hover:bg-orange-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-75">
+            <button
+              type="submit"
+              disabled={updateSubredditMutation.isPending}
+              className={`${
+                updateSubredditMutation.isPending
+                  ? "cursor-not-allowed opacity-50"
+                  : ""
+              } px-3 py-2 bg-orange-600 hover:bg-orange-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-75`}
+            >
               Save
             </button>
           </div>
