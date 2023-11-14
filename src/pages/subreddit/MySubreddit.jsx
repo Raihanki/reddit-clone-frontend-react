@@ -36,11 +36,19 @@ export default function MySubreddit() {
             >
               <div className="flex gap-x-5 items-center">
                 <div>
-                  <img
-                    src="https://source.unsplash.com/random"
-                    alt="subreddit-image"
-                    className="w-16 h-16 object-cover rounded-full"
-                  />
+                  {subreddit.avatar !== null ? (
+                    <img
+                      src={subreddit.avatar}
+                      alt="subreddit-avatar"
+                      className="w-20 h-20 object-cover rounded-full"
+                    />
+                  ) : (
+                    <img
+                      src="https://source.unsplash.com/random"
+                      alt="subreddit-avatar"
+                      className="w-20 h-20 object-cover rounded-full"
+                    />
+                  )}
                 </div>
                 <div>
                   <div>

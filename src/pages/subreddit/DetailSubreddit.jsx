@@ -74,11 +74,19 @@ export default function DetailSubreddit() {
     <div>
       <div className="flex flex-col md:flex-row items-center md:items-start justify-center md:justify-start gap-x-5 gap-y-5 border-b pb-10">
         <div className="w-full md:w-1/3 flex md:block justify-center">
-          <img
-            src="https://source.unsplash.com/random"
-            alt="subreddit-picture"
-            className="w-64 h-64 object-cover rounded-full"
-          />
+          {subreddit.avatar !== null ? (
+            <img
+              src={subreddit.avatar}
+              alt="subreddit-avatar"
+              className="w-64 h-64 object-cover rounded-full"
+            />
+          ) : (
+            <img
+              src="https://source.unsplash.com/random"
+              alt="subreddit-avatar"
+              className="w-64 h-64 object-cover rounded-full"
+            />
+          )}
         </div>
         <div>
           <h1 className="text-3xl">{subreddit.name}</h1>

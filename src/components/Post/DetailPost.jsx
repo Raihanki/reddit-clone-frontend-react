@@ -6,15 +6,17 @@ import {
 import Comment from "./Comment";
 import ApiRequest from "../../api/RequestConfig";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Loading from "../Loading";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { IconArrowBigUp } from "@tabler/icons-react";
+import { useAuth } from "../../context/AuthContext";
 
 export default function DetailPost() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { authenticatedUser } = useAuth();
   const { subreddit, post } = useParams();
   const { data, isLoading, isError } = useQuery({
     queryKey: ["post", post],
@@ -70,13 +72,18 @@ export default function DetailPost() {
   };
 
   const [voteType, setVoteType] = useState(data?.data?.data.myVote);
-  console.log(voteType);
+
   const createVoteMutation = useMutation({
     mutationFn: (data) => {
-      return ApiRequest.post(`/votes/${dataPost.id}`, data);
+      if (dataPost.myVote === null) {
+        return ApiRequest.post(`/votes/${dataPost.id}`, data);
+      } else if (dataPost.myVote === data.voteType) {
+        return ApiRequest.delete(`/votes/${dataPost.id}`);
+      } else {
+        return ApiRequest.put(`/votes/${dataPost.id}`, data);
+      }
     },
     onSuccess: (data) => {
-      console.log(data);
       queryClient.invalidateQueries({
         queryKey: ["post", post],
       });
@@ -128,6 +135,16 @@ export default function DetailPost() {
                   {" "}
                   {dataPost.user.username}
                 </span>
+                <span>
+                  {" "}
+                  in{" "}
+                  <Link
+                    className="cursor-pointer text-rose-800 hover:text-rose-900"
+                    to={`/r/${dataPost.subreddit.slug}`}
+                  >
+                    /r/{dataPost.subreddit.slug}
+                  </Link>
+                </span>
               </span>
             </div>
             <div className="py-10">
@@ -141,30 +158,34 @@ export default function DetailPost() {
               </div> */}
             </div>
             <div className="mb-4 flex items-center gap-x-5">
-              <button
-                type="submit"
-                disabled={deletePostMutation.isPending}
-                onClick={handleDelete}
-                className={`${
-                  deletePostMutation.isPending
-                    ? "cursor-not-allowed opacity-50"
-                    : ""
-                } px-3 py-2 bg-rose-600 hover:bg-rose-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-opacity-50 transition duration-75`}
-              >
-                Delete
-              </button>
+              {authenticatedUser.id === dataPost.user.id ||
+                (authenticatedUser.username ===
+                  dataPost.subreddit.createdBy && (
+                  <button
+                    type="submit"
+                    disabled={deletePostMutation.isPending}
+                    onClick={handleDelete}
+                    className={`${
+                      deletePostMutation.isPending
+                        ? "cursor-not-allowed opacity-50"
+                        : ""
+                    } px-3 py-2 bg-rose-600 hover:bg-rose-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-opacity-50 transition duration-75`}
+                  >
+                    Delete
+                  </button>
+                ))}
               <div className="flex items-center gap-x-2">
                 <IconArrowBigUp
                   onClick={handleUpVoteClick}
                   className={`text-orange-800 w-8 h-8 cursor-pointer hover:fill-orange-800 ${
-                    voteType === "up" && "fill-orange-800"
+                    data?.data?.data?.myVote === "up" && "fill-orange-800"
                   }`}
                 />
               </div>
               <IconArrowBigDown
                 onClick={handleDownVoteClick}
                 className={`text-orange-800 w-8 h-8 cursor-pointer hover:fill-orange-800 ${
-                  voteType === "down" && "fill-orange-800"
+                  data?.data?.data?.myVote === "down" && "fill-orange-800"
                 }`}
               />
             </div>
@@ -206,9 +227,16 @@ export default function DetailPost() {
             </button>
           </form>
         </div>
-        {dataPost.comments.map((comment) => (
-          <Comment key={comment.id} comment={comment}></Comment>
-        ))}
+        {dataPost.comments
+          .filter((comment) => comment.parentId === null)
+          .map((comment) => (
+            <Comment
+              key={comment.id}
+              comment={comment}
+              subreddit={dataPost.subreddit.slug}
+              post={dataPost.slug}
+            ></Comment>
+          ))}
       </div>
     </>
   );

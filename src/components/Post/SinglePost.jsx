@@ -4,7 +4,7 @@ import {
   IconMessage,
 } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
-import moment from "moment";
+import moment from "moment-timezone";
 
 export default function SinglePost(props) {
   const post = props.post;
@@ -25,8 +25,7 @@ export default function SinglePost(props) {
         <h3 className="text-gray-800 text-xl">{post.title}</h3>
         <div>
           <span className="text-gray-700 text-sm">
-            {moment(post.created_at).startOf("day").fromNow()} by{" "}
-            {post.user.username}
+            {moment.utc(post.createdAt).fromNow()} by {post.user.username}
           </span>
         </div>
         <div>
