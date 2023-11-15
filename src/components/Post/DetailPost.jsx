@@ -160,8 +160,8 @@ export default function DetailPost() {
               )}
             </div>
             <div className="mb-4 flex items-center gap-x-5">
-              {authenticatedUser.id === dataPost.user.id ||
-              authenticatedUser.username === dataPost.subreddit.createdBy ? (
+              {authenticatedUser?.id === dataPost.user.id ||
+              authenticatedUser?.username === dataPost.subreddit.createdBy ? (
                 <button
                   type="submit"
                   disabled={deletePostMutation.isPending}

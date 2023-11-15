@@ -69,6 +69,44 @@ export default function DetailSubreddit() {
     createPostMutation.mutate(formdata);
   };
 
+  const subscribeMutation = useMutation({
+    mutationKey: ["subscribe"],
+    mutationFn: (data) => {
+      return ApiRequest.post(`/subreddits/${data}/subscribe`);
+    },
+    onSuccess: () => {
+      query.refetch();
+    },
+    onError: (err) => {
+      if (err.response.status === 401) {
+        navigate("/login");
+      }
+    },
+  });
+
+  const unsubscribeMutation = useMutation({
+    mutationKey: ["unsubscribe"],
+    mutationFn: (data) => {
+      return ApiRequest.delete(`/subreddits/${data.subreddit}/unsubscribe`);
+    },
+    onSuccess: () => {
+      query.refetch();
+    },
+    onError: (err) => {
+      if (err.response.status === 401) {
+        navigate("/login");
+      }
+    },
+  });
+
+  const handleSubscribe = (subreddit) => {
+    subscribeMutation.mutate(subreddit);
+  };
+
+  const handleUnsubscribe = (subreddit) => {
+    unsubscribeMutation.mutate({ subreddit });
+  };
+
   if (query.isLoading) {
     return (
       <div className="w-full flex items-center justify-center mt-20">
@@ -120,9 +158,29 @@ export default function DetailSubreddit() {
                 </Link>
               </div>
             )}
-            <button className="px-3 py-2 bg-orange-600 hover:bg-orange-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-75">
-              Subscribe
-            </button>
+            {subreddit.subscribed ? (
+              <button
+                onClick={() => handleUnsubscribe(subreddit.slug)}
+                className={`${
+                  unsubscribeMutation.isPending
+                    ? "cursor-not-allowed opacity-50"
+                    : ""
+                } px-3 py-2 bg-orange-600 hover:bg-orange-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-75`}
+              >
+                Unsubscribe
+              </button>
+            ) : (
+              <button
+                onClick={() => handleSubscribe(subreddit.slug)}
+                className={`${
+                  subscribeMutation.isPending
+                    ? "cursor-not-allowed opacity-50"
+                    : ""
+                } px-3 py-2 bg-orange-600 hover:bg-orange-700 rounded text-sm capitalize shadow-sm text-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-75`}
+              >
+                Subscribe
+              </button>
+            )}
             {subreddit.createdBy === authenticatedUser?.username && (
               <button
                 onClick={handleDelete}
